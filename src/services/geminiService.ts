@@ -78,7 +78,7 @@ export interface CharacterMessageResult {
 }
 
 export const generateCharacterMessage = async (
-  modelName: string = 'gemini-2.0-flash',
+  modelName: string = 'gemini-3.1-flash-lite-preview',
   systemInstruction: string,
   history: any[],
   userMessage: string | any[],
@@ -90,10 +90,14 @@ export const generateCharacterMessage = async (
   interactionMode: 'chat' | 'roleplay' = 'chat',
   currentEmotion?: string
 ): Promise<CharacterMessageResult | string> => {
-  const modelsToTry = [modelName];
-  if (modelName !== 'gemini-2.0-flash') {
-    modelsToTry.push('gemini-2.0-flash');
-  }
+  // Use a unique list of models to try
+  const modelsToTry = Array.from(new Set([
+    modelName,
+    'gemini-3.1-flash-lite-preview',
+    'gemini-3-flash-preview',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash'
+  ]));
 
   let lastError: any = null;
 
@@ -229,7 +233,7 @@ export const generateCharacterMessage = async (
 };
 
 export const generateChatResponse = async (
-  modelName: string = 'gemini-2.0-flash',
+  modelName: string = 'gemini-3.1-pro-preview',
   systemInstruction: string,
   history: any[],
   userMessage: string | any[],
@@ -240,10 +244,15 @@ export const generateChatResponse = async (
   dynamicMemory?: string[],
   interactionMode: 'chat' | 'roleplay' = 'chat'
 ): Promise<string> => {
-  const modelsToTry = [modelName];
-  if (modelName !== 'gemini-2.0-flash') {
-    modelsToTry.push('gemini-2.0-flash');
-  }
+  // Use a unique list of models to try
+  const modelsToTry = Array.from(new Set([
+    modelName,
+    'gemini-3.1-pro-preview',
+    'gemini-3-flash-preview',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro'
+  ]));
 
   let lastError: any = null;
 
@@ -394,7 +403,7 @@ export const decideResponders = async (
       `;
     }
 
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash'];
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash'];
     let lastError: any = null;
 
     for (const currentModel of modelsToTry) {
@@ -466,10 +475,10 @@ export const generateImage = async (
 
     let response;
     try {
-      // Use gemini-2.5-flash as the primary model for better compatibility
-      console.log("Attempting generation with gemini-2.5-flash...");
+      // Use gemini-1.5-flash as the most reliable fallback if the experimental 3.1 ones fail
+      console.log("Attempting generation with gemini-3.1-flash-image-preview...");
       response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash-image-preview',
         contents: {
           parts,
         },
@@ -481,11 +490,10 @@ export const generateImage = async (
         }
       });
     } catch (e: any) {
-      console.warn("gemini-2.5-flash failed, trying gemini-2.5-flash...", e.message);
-      // Fallback to 3.1 if 2.5 fails (unlikely but good for robustness)
+      console.warn("gemini-3.1-flash-image-preview failed, trying gemini-1.5-flash...", e.message);
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-1.5-flash',
           contents: {
             parts,
           },
@@ -498,7 +506,7 @@ export const generateImage = async (
           }
         });
       } catch (e2: any) {
-        console.error("Both Gemini image models failed:", e2.message);
+        console.error("All Gemini image models failed:", e2.message);
         if (isApiKeyError(e2)) return "ERROR_API_KEY: Invalid API Key";
         if (isQuotaError(e2)) return "ERROR_QUOTA: Quota exceeded";
         return `ERROR_TECHNICAL: ${e2.message || 'Unknown error'}`;
@@ -673,7 +681,7 @@ export const updateCharacterMemory = async (
       Example Output: ["[Preference] User mentioned they like pizza", "[Relationship] Character and User are now friends", "[Event] The scene is currently set in a dark forest"]
     `;
 
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-2.0-flash'];
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash'];
     let lastError: any = null;
 
     for (const currentModel of modelsToTry) {
@@ -736,7 +744,7 @@ export const generateSpeech = async (
       const prompt = (useStyle && voiceStyle) ? `Say ${voiceStyle}: ${cleanText}` : cleanText;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
+        model: "gemini-3.1-flash-lite-preview-tts",
         contents: [{ parts: [{ text: prompt }] }],
         config: {
           responseModalities: [Modality.AUDIO],
@@ -799,7 +807,7 @@ export const generateCharacterDetails = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       contents: [{ parts: [{ text: `User Instructions: ${userPrompt}` }] }],
       config: {
         systemInstruction: systemPrompt,
