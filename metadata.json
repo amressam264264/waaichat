@@ -1,0 +1,5 @@
+{
+  "name": "RolePlay AI",
+  "description": "A WhatsApp-style roleplaying chat interface where you can create and interact with AI characters, featuring image generation and custom instructions.",
+  "requestFramePermissions": []
+}

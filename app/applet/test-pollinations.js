@@ -1,0 +1,14 @@
+import fetch from 'node-fetch';
+
+async function test() {
+  const url = 'https://image.pollinations.ai/prompt/test';
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    console.log(`${url}: ${res.status} ${text}`);
+  } catch (e) {
+    console.log(`${url}: Error ${e.message}`);
+  }
+}
+
+test();

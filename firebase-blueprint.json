@@ -1,0 +1,130 @@
+{
+  "entities": {
+    "Character": {
+      "title": "Character",
+      "description": "A roleplay character profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "avatar": { "type": "string" },
+        "referenceImage": { "type": "string" },
+        "systemInstruction": { "type": "string" },
+        "description": { "type": "string" },
+        "backstory": { "type": "string" },
+        "appearance": { "type": "string" },
+        "baseMemory": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dynamicMemory": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "memory": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "number" },
+        "uid": { "type": "string", "description": "Owner UID" }
+      },
+      "required": ["id", "name", "systemInstruction", "description", "createdAt", "uid"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A conversation metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "characterId": { "type": "string", "description": "Primary character ID (Legacy/Single)" },
+        "characterIds": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "List of character IDs in this chat"
+        },
+        "isGroup": { "type": "boolean" },
+        "groupName": { "type": "string" },
+        "specificInstructions": { "type": "string" },
+        "specificUserPersona": { "type": "string" },
+        "lastMessageAt": { "type": "number" },
+        "lastMessageContent": { "type": "string" },
+        "uid": { "type": "string", "description": "Owner UID" }
+      },
+      "required": ["id", "lastMessageAt", "uid"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "characterId": { "type": "string", "description": "ID of the character who sent this message" },
+        "characterName": { "type": "string", "description": "Name of the character for display" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "type": { "type": "string", "enum": ["text", "image"] },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "role", "content", "timestamp", "type"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "User application settings",
+      "type": "object",
+      "properties": {
+        "generalInstructions": { "type": "string" },
+        "imageRetryInstructions": { "type": "string" },
+        "preferredAspectRatio": { 
+          "type": "string", 
+          "enum": ["1:1", "3:4", "4:3", "9:16", "16:9"] 
+        },
+        "preferredImageEngine": { 
+          "type": "string", 
+          "enum": ["gemini", "pollenations"] 
+        },
+        "userPersona": { "type": "string" },
+        "customApiKey": { "type": "string" },
+        "uid": { "type": "string" }
+      },
+      "required": ["generalInstructions", "imageRetryInstructions", "preferredAspectRatio", "preferredImageEngine", "uid"]
+    },
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "A character's personal journal entry about the user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "characterId": { "type": "string" },
+        "characterName": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "uid": { "type": "string", "description": "Owner UID" }
+      },
+      "required": ["id", "chatId", "characterId", "characterName", "content", "timestamp", "uid"]
+    }
+  },
+  "firestore": {
+    "/characters/{characterId}": {
+      "schema": "Character",
+      "description": "User characters"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "User chats"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Messages within a chat"
+    },
+    "/settings/{userId}": {
+      "schema": "Settings",
+      "description": "User settings"
+    },
+    "/journals/{journalId}": {
+      "schema": "JournalEntry",
+      "description": "Character journal entries"
+    }
+  }
+}

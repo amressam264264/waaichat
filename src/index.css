@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ced0d1;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #aebac1;
+  }
+}
+
+body {
+  overflow: hidden;
+}

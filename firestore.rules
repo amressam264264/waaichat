@@ -1,0 +1,98 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: characters
+// Document ID: characterId
+// Fields:
+//   - uid: string (required, must match auth.uid)
+//
+// Collection: chats
+// Document ID: chatId
+// Fields:
+//   - uid: string (required, must match auth.uid)
+//
+// Collection: messages (subcollection of chats)
+// Document ID: messageId
+// Fields:
+//   - role: string (required, 'user' or 'model')
+//
+// Collection: settings
+// Document ID: userId
+// Fields:
+//   - uid: string (required, must match auth.uid)
+//
+// Collection: journals
+// Document ID: journalId
+// Fields:
+//   - uid: string (required, must match auth.uid)
+//   - chatId: string (required)
+//   - characterId: string (required)
+//   - content: string (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && (
+        (resource != null && resource.data.uid == request.auth.uid) ||
+        (request.resource != null && request.resource.data.uid == request.auth.uid)
+      );
+    }
+
+    function isValidJournal(data) {
+      return data.keys().hasAll(['id', 'chatId', 'characterId', 'characterName', 'content', 'timestamp', 'uid']) &&
+             data.id is string &&
+             data.chatId is string &&
+             data.characterId is string &&
+             data.characterName is string &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 10000 &&
+             data.timestamp is number &&
+             data.uid == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /characters/{characterId} {
+      allow read, write: if isDocOwner();
+    }
+
+    match /chats/{chatId} {
+      allow read, write: if isDocOwner();
+
+      match /messages/{messageId} {
+        // Check parent chat ownership
+        allow read, write: if isAuthenticated() && 
+          get(/databases/$(database)/documents/chats/$(chatId)).data.uid == request.auth.uid;
+      }
+    }
+
+    match /settings/{uId} {
+      allow read, write: if isOwner(uId);
+    }
+
+    match /journals/{journalId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidJournal(request.resource.data);
+      allow update: if isDocOwner() && isValidJournal(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+  }
+}
