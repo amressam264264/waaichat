@@ -20,11 +20,23 @@ const safetySettings = [
 ];
 
 const getGeminiApiKey = (customApiKey?: string) => {
-  const key = customApiKey || process.env.API_KEY || process.env.GEMINI_API_KEY;
+  let platformKey = undefined;
+  let systemKey = undefined;
+  
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+      platformKey = process.env.API_KEY;
+      systemKey = process.env.GEMINI_API_KEY;
+    }
+  } catch (e) {
+    // Ignore process access errors in browser
+  }
+
+  const key = customApiKey || platformKey || systemKey;
   if (!key) {
-    console.warn("No Gemini API key found in customApiKey, process.env.API_KEY, or process.env.GEMINI_API_KEY");
+    console.warn("No Gemini API key found in customApiKey, platform, or system");
   } else {
-    const source = customApiKey ? "Manual" : (process.env.API_KEY ? "Platform" : (process.env.GEMINI_API_KEY ? "System" : "Unknown"));
+    const source = customApiKey ? "Manual" : (platformKey ? "Platform" : (systemKey ? "System" : "Unknown"));
     console.log(`Using Gemini API Key from: ${source}`);
   }
   return key;
@@ -34,11 +46,21 @@ const getAiInstance = (customApiKey?: string) => {
   const apiKey = getGeminiApiKey(customApiKey);
   
   let source = "unknown";
+  let platformKey = undefined;
+  let systemKey = undefined;
+  
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+      platformKey = process.env.API_KEY;
+      systemKey = process.env.GEMINI_API_KEY;
+    }
+  } catch (e) {}
+
   if (customApiKey) {
     source = "Manual Key (Settings)";
-  } else if (process.env.API_KEY) {
+  } else if (platformKey) {
     source = "Platform Key (Connect button)";
-  } else if (process.env.GEMINI_API_KEY) {
+  } else if (systemKey) {
     source = "System Key (Shared)";
   }
 
@@ -559,14 +581,28 @@ export const generateImagePollinations = async (
       const nologoParam = apiKey ? '&nologo=true' : '';
       const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}${nologoParam}&model=zimage`;
       
-      // Use the server-side proxy to avoid CORS issues
-      // Pass the API key to the proxy if available
-      const keyParam = apiKey ? `&api_key=${encodeURIComponent(apiKey)}` : '';
-      const proxyUrl = `/image-proxy-v3?url=${encodeURIComponent(imageUrl)}${keyParam}&cb=${Date.now()}`;
-      console.log("[GEMINI] Fetching from proxy:", proxyUrl);
-      const response = await fetch(proxyUrl);
+      // Try direct fetch first to support Vercel/static deployments
+      let response;
+      try {
+        const headers: any = {};
+        if (apiKey) {
+          headers["Authorization"] = `Bearer ${apiKey}`;
+        }
+        console.log("[GEMINI] Fetching directly from Pollinations:", imageUrl);
+        response = await fetch(imageUrl, { headers });
+      } catch (e) {
+        console.warn("[GEMINI] Direct fetch failed (likely CORS), falling back to proxy...", e);
+        const keyParam = apiKey ? `&api_key=${encodeURIComponent(apiKey)}` : '';
+        const proxyUrl = `/image-proxy-v3?url=${encodeURIComponent(imageUrl)}${keyParam}&cb=${Date.now()}`;
+        console.log("[GEMINI] Fetching from proxy:", proxyUrl);
+        response = await fetch(proxyUrl);
+      }
 
       if (!response.ok) {
+        // If proxy returns 404 (e.g. on Vercel), it might return HTML
+        if (response.status === 404) {
+          throw new Error(`Image generation failed: Proxy not found (404). If you are on Vercel, direct fetch might be blocked by CORS or adblocker.`);
+        }
         const errorText = await response.text();
         try {
           const errorJson = JSON.parse(errorText);
