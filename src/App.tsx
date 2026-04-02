@@ -295,7 +295,7 @@ function AppContent() {
       ${recentMessages}`;
 
       const journalContent = await generateChatResponse(
-        'gemini-3.1-pro-preview',
+        'gemini-2.0-flash',
         `You are ${char.name}. Write a personal journal entry.`,
         [],
         prompt,
@@ -885,7 +885,7 @@ function AppContent() {
           const currentEmotion = activeChat.characterEmotions?.[char.id]?.emotion;
 
           const aiResponse = await generateCharacterMessage(
-            'gemini-3.1-flash-lite-preview',
+            'gemini-2.0-flash',
             systemInstruction,
             history,
             userParts,
@@ -1163,7 +1163,7 @@ function AppContent() {
           }
 
           currentPrompt = await generateChatResponse(
-            'gemini-3-flash-preview',
+            'gemini-2.0-flash',
             "You are an expert at writing artistic and cinematic image generation prompts that bypass filters by using sophisticated, artistic language and framing. You also excel at maintaining visual consistency between images.",
             [],
             promptParts,
@@ -1322,7 +1322,7 @@ function AppContent() {
             try {
               console.log(`Attempting prompt repair (Retry ${currentRetry + 1}/${MAX_RETRIES})...`);
               const revisedPrompt = await generateChatResponse(
-                'gemini-3-flash-preview',
+                'gemini-2.0-flash',
                 "You are a master at troubleshooting AI image generation failures. You can rewrite prompts to be safer while preserving the original artistic intent and realism.",
                 [],
                 repairPrompt,
@@ -1369,7 +1369,7 @@ function AppContent() {
           `;
           
           currentPrompt = await generateChatResponse(
-            'gemini-3-flash-preview',
+            'gemini-2.0-flash',
             settings.imageRetryInstructions || DEFAULT_IMAGE_RETRY_INSTRUCTIONS,
             [],
             rewritePrompt,
@@ -3512,7 +3512,7 @@ function CharacterModal({
                 onClick={async () => {
                   const loadingToast = toast.loading("Generating appearance description...");
                   const prompt = `Generate a detailed physical appearance description for a character named ${name}, age ${age}. Description: ${description}. Focus on clothing, features, and style.`;
-                  const response = await generateChatResponse('gemini-3.1-flash-lite-preview', "You are a character designer. Return ONLY the appearance description.", [], prompt, settings.customApiKey);
+                  const response = await generateChatResponse('gemini-2.0-flash', "You are a character designer. Return ONLY the appearance description.", [], prompt, settings.customApiKey);
                   if (response) {
                     setAppearance(response);
                     toast.success("Appearance generated!", { id: loadingToast });
@@ -3607,7 +3607,7 @@ function CharacterModal({
                 onClick={async () => {
                   const loadingToast = toast.loading("Generating personality instructions...");
                   const prompt = `Generate detailed roleplay instructions for a character named ${name}, age ${age}. Description: ${description}. Backstory: ${backstory}. Focus on tone, speech patterns, and behaviors.`;
-                  const response = await generateChatResponse('gemini-3.1-flash-lite-preview', "You are a character designer. Return ONLY the system instructions for an AI to roleplay as this character.", [], prompt, settings.customApiKey);
+                  const response = await generateChatResponse('gemini-2.0-flash', "You are a character designer. Return ONLY the system instructions for an AI to roleplay as this character.", [], prompt, settings.customApiKey);
                   if (response) {
                     setSystemInstruction(response);
                     toast.success("Instructions generated!", { id: loadingToast });
@@ -4139,7 +4139,7 @@ function SettingsModal({ settings, onClose, onSave, onOpenKeySelector }: { setti
                       }
                       try {
                         const testResponse = await generateChatResponse(
-                          'gemini-3-flash-preview',
+                          'gemini-2.0-flash',
                           "You are a test assistant.",
                           [],
                           "Say 'API Key is working!'",
@@ -4148,7 +4148,7 @@ function SettingsModal({ settings, onClose, onSave, onOpenKeySelector }: { setti
                         if (testResponse.startsWith('ERROR_API_KEY')) {
                           alert(`API Key Error (Tried your Custom API Key: ${customApiKey.trim().substring(0, 10)}...): ${testResponse}`);
                         } else if (testResponse.startsWith('ERROR_QUOTA')) {
-                          alert(`Quota Error (Tried your Custom API Key: ${customApiKey.trim().substring(0, 10)}...):\n\n${testResponse}\n\nNote: Google Cloud strictly restricts quotas (often 0 limits) for newly created accounts trying to access preview models like 'gemini-3.1-flash-lite-preview' or 'gemini-3-flash-preview'. This limits your fresh key from working on these models.`);
+                          alert(`Quota Error (Tried your Custom API Key: ${customApiKey.trim().substring(0, 10)}...):\n\n${testResponse}\n\nNote: Google Cloud strictly restricts quotas (often 0 limits) for newly created accounts trying to access preview models like 'gemini-2.0-flash' or 'gemini-2.0-flash'. This limits your fresh key from working on these models.`);
                         } else {
                           alert(`Success! (Using your Custom API Key: ${customApiKey.trim().substring(0, 10)}...): ${testResponse}`);
                         }
