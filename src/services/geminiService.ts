@@ -78,7 +78,7 @@ export interface CharacterMessageResult {
 }
 
 export const generateCharacterMessage = async (
-  modelName: string = 'gemini-3.1-flash-lite-preview',
+  modelName: string = 'gemini-1.5-flash',
   systemInstruction: string,
   history: any[],
   userMessage: string | any[],
@@ -91,8 +91,8 @@ export const generateCharacterMessage = async (
   currentEmotion?: string
 ): Promise<CharacterMessageResult | string> => {
   const modelsToTry = [modelName];
-  if (modelName !== 'gemini-3-flash-preview') {
-    modelsToTry.push('gemini-3-flash-preview');
+  if (modelName !== 'gemini-1.5-flash') {
+    modelsToTry.push('gemini-1.5-flash');
   }
 
   let lastError: any = null;
@@ -229,7 +229,7 @@ export const generateCharacterMessage = async (
 };
 
 export const generateChatResponse = async (
-  modelName: string = 'gemini-3.1-flash-lite-preview',
+  modelName: string = 'gemini-1.5-flash',
   systemInstruction: string,
   history: any[],
   userMessage: string | any[],
@@ -241,8 +241,8 @@ export const generateChatResponse = async (
   interactionMode: 'chat' | 'roleplay' = 'chat'
 ): Promise<string> => {
   const modelsToTry = [modelName];
-  if (modelName !== 'gemini-3-flash-preview') {
-    modelsToTry.push('gemini-3-flash-preview');
+  if (modelName !== 'gemini-1.5-flash') {
+    modelsToTry.push('gemini-1.5-flash');
   }
 
   let lastError: any = null;
@@ -394,7 +394,7 @@ export const decideResponders = async (
       `;
     }
 
-    const modelsToTry = ['gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview'];
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-flash'];
     let lastError: any = null;
 
     for (const currentModel of modelsToTry) {
@@ -673,7 +673,7 @@ export const updateCharacterMemory = async (
       Example Output: ["[Preference] User mentioned they like pizza", "[Relationship] Character and User are now friends", "[Event] The scene is currently set in a dark forest"]
     `;
 
-    const modelsToTry = ['gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview'];
+    const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-flash'];
     let lastError: any = null;
 
     for (const currentModel of modelsToTry) {
@@ -799,7 +799,7 @@ export const generateCharacterDetails = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-1.5-flash",
       contents: [{ parts: [{ text: `User Instructions: ${userPrompt}` }] }],
       config: {
         systemInstruction: systemPrompt,
