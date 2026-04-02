@@ -4146,11 +4146,11 @@ function SettingsModal({ settings, onClose, onSave, onOpenKeySelector }: { setti
                           customApiKey.trim()
                         );
                         if (testResponse.startsWith('ERROR_API_KEY')) {
-                          alert("API Key Error: " + testResponse);
+                          alert(`API Key Error (Tried your Custom API Key: ${customApiKey.trim().substring(0, 10)}...): ${testResponse}`);
                         } else if (testResponse.startsWith('ERROR_QUOTA')) {
-                          alert("Quota Error: " + testResponse);
+                          alert(`Quota Error (Tried your Custom API Key: ${customApiKey.trim().substring(0, 10)}...):\n\n${testResponse}\n\nNote: Google Cloud strictly restricts quotas (often 0 limits) for newly created accounts trying to access preview models like 'gemini-3.1-flash-lite-preview' or 'gemini-3-flash-preview'. This limits your fresh key from working on these models.`);
                         } else {
-                          alert("Success: " + testResponse);
+                          alert(`Success! (Using your Custom API Key: ${customApiKey.trim().substring(0, 10)}...): ${testResponse}`);
                         }
                       } catch (e: any) {
                         alert("Error testing key: " + e.message);
